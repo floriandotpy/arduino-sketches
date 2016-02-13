@@ -1,11 +1,16 @@
-int pinA = 4;
-int pinB = 5;
+int pinA = 2;
+int pinB = 4;
 int pinC = 6;
-int pinD = 7;
+int pinD = 8;
 
-int speakerOut = 9;
+int pinLedA = 3;
+int pinLedB = 5;
+int pinLedC = 7;
+int pinLedD = 9;
 
-// TONES  ==========================================
+int speakerOut = 10;
+
+// Tones
 int  c = 3830;    // 261 Hz 
 int  d = 3400;    // 294 Hz 
 int  e = 3038;    // 329 Hz 
@@ -30,11 +35,8 @@ int toneB = D;
 int toneC = E;
 int toneD = F;
 
-int pause = 10;
-// Set overall tempo
-long tempo = 30000;
-
-int rest_count = 100; //<-BLETCHEROUS HACK; See NOTES
+// each tone is played several times
+int toneDurationMultiplier = 4;
 
 // input states
 int aDown = 0;
@@ -49,49 +51,77 @@ void setup() {
   pinMode(pinC, INPUT);
   pinMode(pinD, INPUT);
 
+  pinMode(pinLedA, OUTPUT);
+  pinMode(pinLedB, OUTPUT);
+  pinMode(pinLedC, OUTPUT);
+  pinMode(pinLedD, OUTPUT);
+
   pinMode(speakerOut, OUTPUT);
 
-  //Serial.begin(9600);
+  hello();
 }
 
+void hello()
+{
+  long d = 200000;
 
-// PLAY TONE  ==============================================
+  digitalWrite(pinLedA, HIGH);
+  playTone(toneA, d);
+  digitalWrite(pinLedA, LOW);
+
+  digitalWrite(pinLedB, HIGH);
+  playTone(toneB, d);
+  digitalWrite(pinLedB, LOW);
+
+  digitalWrite(pinLedC, HIGH);
+  playTone(toneC, d);
+  digitalWrite(pinLedC, LOW);
+
+  digitalWrite(pinLedD, HIGH);
+  playTone(toneD, d);
+  digitalWrite(pinLedD, LOW);
+
+  delay(100);
+
+  digitalWrite(pinLedA, HIGH);
+  digitalWrite(pinLedB, HIGH);
+  digitalWrite(pinLedC, HIGH);
+  digitalWrite(pinLedD, HIGH);
+
+  delay(100);
+
+  digitalWrite(pinLedA, LOW);
+  digitalWrite(pinLedB, LOW);
+  digitalWrite(pinLedC, LOW);
+  digitalWrite(pinLedD, LOW);
+}
+
 // Pulse the speaker to play a tone for a particular duration
 void playTone(int tone_, long duration) {
+  
   long elapsed_time = 0;
-  if (tone_ > 0) { // if this isn't a Rest beat, while the tone has 
-    //  played less long than 'duration', pulse speaker HIGH and LOW
-    while (elapsed_time < duration) {
- 
-      digitalWrite(speakerOut, HIGH);
-      delayMicroseconds(tone_ / 2);
+  
+  //  played less long than 'duration', pulse speaker HIGH and LOW
+  while (elapsed_time < duration) {
 
-      // DOWN
-      digitalWrite(speakerOut, LOW);
-      delayMicroseconds(tone_ / 2);
+    digitalWrite(speakerOut, HIGH);
+    delayMicroseconds(tone_ / 2);
 
-      // Keep track of how long we pulsed
-      elapsed_time += tone_;
-    }
-  }
-  else { // Rest beat; loop times delay
-    for (int j = 0; j < rest_count; j++) { // See NOTE on rest_count
-      delayMicroseconds(duration);  
-    }
-  }                                
+    // DOWN
+    digitalWrite(speakerOut, LOW);
+    delayMicroseconds(tone_ / 2);
+
+    elapsed_time += tone_;
+  }           
 }
 
-
-
 void loop() {
-  
- // playTone(3830, 432000);
- // delayMicroseconds(500);
-  //return;
-  
-  int tone_ = R; // mute by default
-  int beat = 8;
-  long duration = beat * tempo;
+
+  // turn LEDs off by default
+  digitalWrite(pinLedA, LOW);
+  digitalWrite(pinLedB, LOW);
+  digitalWrite(pinLedC, LOW);
+  digitalWrite(pinLedD, LOW);
 
   // read button states
   aDown = digitalRead(pinA);
@@ -100,18 +130,19 @@ void loop() {
   dDown = digitalRead(pinD);
 
   if (aDown) {
-    tone_ = toneA;
+    digitalWrite(pinLedA, HIGH);
+    playTone(toneA, toneA*toneDurationMultiplier);
   }
   if (bDown) {
-    tone_ = toneB;
+    digitalWrite(pinLedB, HIGH);
+    playTone(toneB, toneB*toneDurationMultiplier);
   }
   if (cDown) {
-    tone_ = toneC;
+    digitalWrite(pinLedC, HIGH);
+    playTone(toneC, toneC*toneDurationMultiplier);
   }
   if (dDown) {
-    tone_ = toneD;
+    digitalWrite(pinLedD, HIGH);
+    playTone(toneD, toneD*toneDurationMultiplier);
   }
-
-  playTone(tone_, tone_*8);
-
 }
